@@ -8,7 +8,7 @@ soup = bs(page.content, 'html.parser')
 
 buffs_nerfs = soup.find('div', {'class': 'sch2'})
 
-print(buffs_nerfs.text)
+print(buffs_nerfs.text.strip())
 
 #tier_html = soup.find(id='highlight-plugin')
 #print(tier_html.prettify())
