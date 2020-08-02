@@ -15,10 +15,22 @@ for div in soup.findAll('div', {'style': 'background: #000;opacity: .8;padding: 
     champion_list.append(div.text)
 #print(champion_list)
 
+#issues with link are to do with format of champion names such as those with two words or those separated by a (')
 champion_page_list = []
 for champion in champion_list:
-    champion_page = f'https://lolcounter.com/champions/{champion}'
-    champion_page_list.append(champion_page)
+    champion = champion.lower()
+    if len(champion.split()) > 1:
+        hyphenated = champion.replace(" ","-")
+        final = hyphenated.replace(".","")
+        champion_page = f'https://lolcounter.com/champions/{final}'
+        champion_page_list.append(champion_page)
+    elif "'" in champion:
+        final = champion.replace("'","")
+        champion_page = f'https://lolcounter.com/champions/{final}'
+        champion_page_list.append(champion_page)
+    else:
+        champion_page = f'https://lolcounter.com/champions/{champion}'
+        champion_page_list.append(champion_page)
 #print(champion_page_list)
 
 with open('champion_counters.csv', mode='a') as champ_file:
@@ -30,7 +42,10 @@ with open('champion_counters.csv', mode='a') as champ_file:
         for champion_link in champion_page_list:
             champion_page = req.get(champion_link)
             champion_soup = bs(champion_page.content, 'html.parser')
-            weak_against = champion_soup.find('div', {'class': 'weak-block'})
+            block3 = champion_soup.find('div', {'class': 'block3 _all'})
+            weak_strong = block3.find('div', {'class': 'weak-strong'})
+            weak_block = weak_strong.find('div', {'class': 'weak'})
+            weak_against = weak_block.find('div', {'class': 'weak-block'})
             weak_list = []
 
             for weak in weak_against.findAll('div', {'class': 'name'}):
@@ -42,4 +57,4 @@ with open('champion_counters.csv', mode='a') as champ_file:
             row = [champion_list[iterator],weak_list,strong_list]
             champ_file_writer.writerow(row)
             iterator+=1
-    
+                
